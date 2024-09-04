@@ -22,7 +22,7 @@ public class Episode {
         try {
             this.rating = Double.valueOf(episodeData.rating());
         } catch (NumberFormatException e) {
-            this.rating = null;
+            this.rating = 0.0;
         }
 
     }
