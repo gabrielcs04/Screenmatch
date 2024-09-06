@@ -18,6 +18,7 @@ public class Main {
     private List<SeriesData> seriesData = new ArrayList<>();
     private SeriesRepository repository;
     private List<Series> series = new ArrayList<>();
+    private Optional<Series> searchedSeries;
 
     public Main(SeriesRepository repository) {
         this.repository = repository;
@@ -36,6 +37,9 @@ public class Main {
                     6 - Top 5 séries buscadas
                     7 - Buscar série por categoria
                     8 - Filtrar séries por temporada e avaliação
+                    9 - Buscar episódio por trecho do título
+                    10 - Top 5 episódios de uma série
+                    11 - Buscar episódios de uma série a partir de um ano
                     0 - Sair
                     """;
 
@@ -68,6 +72,15 @@ public class Main {
                     break;
                 case 8:
                     filterSeriesBySeasonAndRating();
+                    break;
+                case 9:
+                    searchEpisodeByTitleSnippet();
+                    break;
+                case 10:
+                    searchTopFiveEpisodesBySeries();
+                    break;
+                case 11:
+                    searchEpisodesBySeriesAndAfterDate();
                     break;
                 case 0:
                     System.out.println("Saindo...");
@@ -133,10 +146,10 @@ public class Main {
     private void seachSeriesByTitle() {
         System.out.print("Digite o nome da série para busca: ");
         var seriesName = read.nextLine();
-        Optional<Series> searchedSeries = repository.findByTitleContainingIgnoreCase(seriesName);
+        this.searchedSeries = repository.findByTitleContainingIgnoreCase(seriesName);
 
-        if (searchedSeries.isPresent()) {
-            System.out.println("Dados da série: " + searchedSeries.get());
+        if (this.searchedSeries.isPresent()) {
+            System.out.println("Dados da série: " + this.searchedSeries.get());
         } else {
             System.out.println("Série não encotrada");;
         }
@@ -177,8 +190,44 @@ public class Main {
         var rating = read.nextDouble();
         read.nextLine();
 
-        List<Series> filteredSeries = repository.findByTotalSeasonsLessThanEqualAndRatingGreaterThanEqual(totalSeasons, rating);
+        List<Series> filteredSeries = repository.getSeriesByMaximumSeasonAndMinimumRating(totalSeasons, rating);
         System.out.println("Séries filtradas:");
         filteredSeries.forEach(serie -> System.out.println(serie.getTitle() + " | Avaliação: " + serie.getRating()));
+    }
+
+    private void searchEpisodeByTitleSnippet() {
+        System.out.print("Digite o nome do episódigo para busca: ");
+        var episodeTitleSnippet = read.nextLine();
+
+        List<Episode> searchedEpisodes = repository.getEpisodeByTitleSnippet(episodeTitleSnippet);
+        searchedEpisodes.forEach(e -> {
+            System.out.printf("Série: %s | Temporada %s - Episódio %s | Nome: %s\n",
+                    e.getSeries().getTitle(), e.getSeason(), e.getNumber(), e.getTitle());
+        });
+    }
+
+    private void searchTopFiveEpisodesBySeries() {
+        seachSeriesByTitle();
+        if (this.searchedSeries.isPresent()) {
+            Series series = this.searchedSeries.get();
+            List<Episode> topFiveEpisodes = repository.getTopFiveEpisodesBySeries(series);
+            topFiveEpisodes.forEach(e -> {
+                System.out.printf("Temporada %s - Episódio %s | Nome: %s | Avaliação: %f\n",
+                        e.getSeason(), e.getNumber(), e.getTitle(), e.getRating());
+            });
+        }
+    }
+
+    private void searchEpisodesBySeriesAndAfterDate() {
+        seachSeriesByTitle();
+        if (this.searchedSeries.isPresent()) {
+            System.out.print("Digite o ano de lançamento para busca: ");
+            var releaseYear = read.nextInt();
+            read.nextLine();
+
+            Series series = this.searchedSeries.get();
+            List<Episode> filteredEpisodes = repository.getEpisodesBySeriesAndAfterYear(series, releaseYear);
+            filteredEpisodes.forEach(System.out::println);
+        }
     }
 }
