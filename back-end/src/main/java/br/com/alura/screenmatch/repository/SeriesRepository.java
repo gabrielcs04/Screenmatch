@@ -25,6 +25,9 @@ public interface SeriesRepository extends JpaRepository<Series, Long> {
     @Query("SELECT s FROM Series s WHERE s.totalSeasons <= :totalSeasons AND s.rating >= :rating")
     List<Series> getSeriesByMaximumSeasonAndMinimumRating(int totalSeasons, double rating);
 
+    @Query("SELECT s FROM Series s JOIN s.episodes e GROUP BY s ORDER BY MAX(e.releaseDate) DESC LIMIT 5")
+    List<Series> getLastFiveSeriesReleased();
+
     @Query("SELECT e FROM Series s JOIN s.episodes e WHERE e.title ILIKE %:episodeTitleSnippet%")
     List<Episode> getEpisodeByTitleSnippet(String episodeTitleSnippet);
 
@@ -34,6 +37,6 @@ public interface SeriesRepository extends JpaRepository<Series, Long> {
     @Query("SELECT e FROM Series s JOIN s.episodes e WHERE s = :series AND YEAR(e.releaseDate) >= :releaseYear")
     List<Episode> getEpisodesBySeriesAndAfterYear(Series series, int releaseYear);
 
-    @Query("SELECT s FROM Series s JOIN s.episodes e GROUP BY s ORDER BY MAX(e.releaseDate) DESC LIMIT 5")
-    List<Series> getLastFiveSeriesReleased();
+    @Query("SELECT e FROM Series s JOIN s.episodes e WHERE s.id = :id AND e.season = :number")
+    List<Episode> getEpisodesBySeason(Long id, Long number);
 }

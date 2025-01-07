@@ -1,6 +1,8 @@
 package br.com.alura.screenmatch.service;
 
+import br.com.alura.screenmatch.dto.EpisodeDTO;
 import br.com.alura.screenmatch.dto.SeriesDTO;
+import br.com.alura.screenmatch.model.Category;
 import br.com.alura.screenmatch.model.Series;
 import br.com.alura.screenmatch.repository.SeriesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,11 @@ public class SeriesService {
         return convertData(repository.getLastFiveSeriesReleased());
     }
 
+    public List<SeriesDTO> getSeriesByCategory(String name) {
+        Category category = Category.fromPortuguese(name);
+        return convertData(repository.findByGenre(category));
+    }
+
     public SeriesDTO getSeriesById(Long id) {
         Optional<Series> series = repository.findById(id);
 
@@ -36,6 +43,26 @@ public class SeriesService {
         }
 
         return null;
+    }
+
+    public List<EpisodeDTO> getAllSeasons(Long id) {
+        Optional<Series> series = repository.findById(id);
+
+        if (series.isPresent()) {
+            Series s = series.get();
+            return s.getEpisodes().stream()
+                    .map(e -> new EpisodeDTO(e.getSeason(), e.getNumber(), e.getTitle()))
+                    .collect(Collectors.toList());
+        }
+
+        return null;
+    }
+
+    public List<EpisodeDTO> getSeasonByNumber(Long id, Long number) {
+        return repository.getEpisodesBySeason(id, number)
+                .stream()
+                .map(e -> new EpisodeDTO(e.getSeason(), e.getNumber(), e.getTitle()))
+                .collect(Collectors.toList());
     }
 
     private List<SeriesDTO> convertData(List<Series> series) {
