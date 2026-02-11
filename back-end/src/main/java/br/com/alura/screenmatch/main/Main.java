@@ -132,7 +132,7 @@ public class Main {
             foundSeries.setEpisodes(episodes);
             repository.save(foundSeries);
         } else {
-            System.out.println("Série não encotrada");;
+            System.out.println("Série não encontrada");;
         }
     }
 
@@ -151,7 +151,7 @@ public class Main {
         if (this.searchedSeries.isPresent()) {
             System.out.println("Dados da série: " + this.searchedSeries.get());
         } else {
-            System.out.println("Série não encotrada");;
+            System.out.println("Série não encontrada");;
         }
     }
 
