@@ -59,7 +59,7 @@ public class Main {
                     listSearchedSeries();
                     break;
                 case 4:
-                    seachSeriesByTitle();
+                    searchSeriesByTitle();
                     break;
                 case 5:
                     seachSeriesByActor();
@@ -143,7 +143,7 @@ public class Main {
                 .forEach(System.out::println);
     }
 
-    private void seachSeriesByTitle() {
+    private void searchSeriesByTitle() {
         System.out.print("Digite o nome da série para busca: ");
         var seriesName = read.nextLine();
         this.searchedSeries = repository.findByTitleContainingIgnoreCase(seriesName);
@@ -207,7 +207,7 @@ public class Main {
     }
 
     private void searchTopFiveEpisodesBySeries() {
-        seachSeriesByTitle();
+        searchSeriesByTitle();
         if (this.searchedSeries.isPresent()) {
             Series series = this.searchedSeries.get();
             List<Episode> topFiveEpisodes = repository.getTopFiveEpisodesBySeries(series);
@@ -219,7 +219,7 @@ public class Main {
     }
 
     private void searchEpisodesBySeriesAndAfterDate() {
-        seachSeriesByTitle();
+        searchSeriesByTitle();
         if (this.searchedSeries.isPresent()) {
             System.out.print("Digite o ano de lançamento para busca: ");
             var releaseYear = read.nextInt();
